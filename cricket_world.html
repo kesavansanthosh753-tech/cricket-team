@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cricket World — ICC Rankings & Stars</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050A0E;
+    --surface: #0D1721;
+    --card: #111D2B;
+    --border: #1E3248;
+    --gold: #D4AF37;
+    --gold-light: #F5D46E;
+    --green: #00C853;
+    --red: #FF3D3D;
+    --blue: #4FC3F7;
+    --text: #E8EDF2;
+    --muted: #7A9BBF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(212,175,55,.18) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(79,195,247,.08) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(30,50,72,.35) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(30,50,72,.35) 60px);
+  }
+  .pitch-circle {
+    position: absolute;
+    width: 520px; height: 520px;
+    border: 1px solid rgba(212,175,55,.15);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: rotate 40s linear infinite;
+  }
+  .pitch-circle::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    border: 1px dashed rgba(212,175,55,.1);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  @keyframes rotate { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+  .hero-eyebrow {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 6px;
+    font-size: .85rem;
+    color: var(--gold);
+    margin-bottom: 16px;
+    animation: fadeUp .8s ease both;
+  }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: .95;
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, #B8860B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeUp .9s .1s ease both;
+  }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-top: 20px;
+    font-weight: 300;
+    animation: fadeUp .9s .2s ease both;
+  }
+  .hero-nav {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp .9s .35s ease both;
+  }
+  .hero-nav a {
+    padding: 10px 24px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all .25s;
+    background: transparent;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .hero-nav a:hover {
+    background: var(--gold);
+    color: var(--bg);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Sections ── */
+  section { padding: 90px 24px; max-width: 1400px; margin: 0 auto; }
+  .sec-label {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 5px;
+    font-size: .8rem;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .sec-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin-bottom: 48px;
+    line-height: 1.1;
+  }
+  .sec-title span { color: var(--gold); }
+
+  /* ── Team Grid ── */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .team-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 18px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .25s, transform .25s;
+  }
+  .team-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--gold);
+    transition: height .3s;
+  }
+  .team-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+  .team-card:hover::before { height: 100%; }
+  .team-flag { font-size: 2.4rem; margin-bottom: 10px; display: block; }
+  .team-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+  }
+  .team-rank {
+    font-size: .75rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .team-rank strong { color: var(--gold); }
+  .team-status {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: .65rem;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .status-test { background: rgba(212,175,55,.15); color: var(--gold); }
+  .status-odi  { background: rgba(79,195,247,.12); color: var(--blue); }
+  .status-t20  { background: rgba(0,200,83,.12);   color: var(--green); }
+
+  /* ── Rankings Table ── */
+  .rank-section { background: var(--surface); margin: 0; max-width: 100%; padding: 90px 24px; }
+  .rank-inner { max-width: 1400px; margin: 0 auto; }
+  .rank-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    padding: 12px 24px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all .2s;
+  }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .rank-table { width: 100%; border-collapse: collapse; }
+  .rank-table thead th {
+    text-align: left;
+    font-size: .7rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .rank-table tbody tr {
+    border-bottom: 1px solid rgba(30,50,72,.5);
+    transition: background .2s;
+  }
+  .rank-table tbody tr:hover { background: rgba(212,175,55,.04); }
+  .rank-table td {
+    padding: 14px 16px;
+    font-size: .9rem;
+    vertical-align: middle;
+  }
+  .rank-no {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--border);
+    width: 50px;
+  }
+  .rank-no.top1 { color: var(--gold); }
+  .rank-no.top2 { color: #C0C0C0; }
+  .rank-no.top3 { color: #CD7F32; }
+  .player-info { display: flex; align-items: center; gap: 12px; }
+  .player-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    border: 1px solid rgba(212,175,55,.3);
+    flex-shrink: 0;
+  }
+  .player-name-cell { font-weight: 600; font-size: .95rem; }
+  .player-country-cell { font-size: .75rem; color: var(--muted); }
+  .rating-bar-wrap { width: 140px; }
+  .rating-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .rating-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 2px; }
+  .rating-num { font-size: .85rem; font-weight: 600; color: var(--gold); }
+
+  /* ── Star Players ── */
+  .stars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .star-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    transition: transform .3s;
+  }
+  .star-card:hover { transform: translateY(-5px); }
+  .star-card-top {
+    height: 6px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  }
+  .star-card-top.bowler { background: linear-gradient(90deg, #4FC3F7, #0288D1); }
+  .star-card-top.allrounder { background: linear-gradient(90deg, #00C853, #1B5E20); }
+  .star-card-body { padding: 24px; }
+  .star-badge {
+    display: inline-block;
+    font-size: .6rem;
+    letter-spacing: 2px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .badge-bat { background: rgba(212,175,55,.15); color: var(--gold); }
+  .badge-bowl { background: rgba(79,195,247,.12); color: var(--blue); }
+  .badge-all  { background: rgba(0,200,83,.12);   color: var(--green); }
+  .star-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .star-country { font-size: .8rem; color: var(--muted); margin-bottom: 16px; }
+  .star-stats {
+    display: flex;
+    gap: 20px;
+  }
+  .stat-item { }
+  .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--text); line-height: 1; }
+  .stat-label { font-size: .65rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .star-emoji {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-size: 2.5rem;
+    opacity: .6;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 40px 24px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: .8rem;
+  }
+  footer strong { color: var(--gold); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+  /* ── Divider ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .hero-nav { gap: 8px; }
+    .rating-bar-wrap { display: none; }
+    .rank-table td { padding: 10px 8px; }
+    .rank-table thead th { padding: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ╔═══════════════════════════════════════╗ -->
+<!-- ║              HERO                    ║ -->
+<!-- ╚═══════════════════════════════════════╝ -->
+<div class="hero">
+  <div class="pitch-circle"></div>
+  <div class="hero-eyebrow">ICC · Official Cricket Universe</div>
+  <h1 class="hero-title">CRICKET<br>WORLD</h1>
+  <p class="hero-sub">Teams · Rankings · Legends · Stars of the Game</p>
+  <nav class="hero-nav">
+    <a href="#teams">All Teams</a>
+    <a href="#rankings">ICC Rankings</a>
+    <a href="#batters">Best Batters</a>
+    <a href="#bowlers">Best Bowlers</a>
+    <a href="#allrounders">All-rounders</a>
+  </nav>
+</div>
+
+<!-- ╔═══════════════════════════════════════╗ -->
+<!-- ║           ALL CRICKET TEAMS          ║ -->
+<!-- ╚═══════════════════════════════════════╝ -->
+<section id="teams">
+  <div class="sec-label">Full Member Nations</div>
+  <h2 class="sec-title">All <span>Cricket Teams</span></h2>
+  <div class="team-grid" id="teamGrid"></div>
+</section>
+
+<hr class="divider">
+
+<!-- ╔═══════════════════════════════════════╗ -->
+<!-- ║          ICC TEAM RANKINGS           ║ -->
+<!-- ╚═══════════════════════════════════════╝ -->
+<div class="rank-section">
+  <div class="rank-inner">
+    <div class="sec-label">ICC Official</div>
+    <h2 class="sec-title">Team <span>Rankings</span></h2>
+    <div class="rank-tabs">
+      <button class="tab-btn active" onclick="switchTab('test-rank','team')">TEST</button>
+      <button class="tab-btn" onclick="switchTab('odi-rank','team')">ODI</button>
+      <button class="tab-btn" onclick="switchTab('t20-rank','team')">T20I</button>
+    </div>
+    <div id="test-rank" class="tab-content active"></div>
+    <div id="odi-rank"  class="tab-content"></div>
+    <div id="t20-rank"  class="tab-content"></div>
+  </div>
+</div>
+
+<!-- ╔═══════════════════════════════════════╗ -->
+<!-- ║       BEST BATTERS RANKINGS          ║ -->
+<!-- ╚═══════════════════════════════════════╝ -->
+<section id="batters">
+  <div class="sec-label">ICC Player Rankings · Batting</div>
+  <h2 class="sec-title">Best <span>Batters</span></h2>
+  <div class="rank-tabs">
+    <button class="tab-btn active" onclick="switchTab('bat-test','player')">TEST</button>
+    <button class="tab-btn" onclick="switchTab('bat-odi','player')">ODI</button>
+    <button class="tab-btn" onclick="switchTab('bat-t20','player')">T20I</button>
+  </div>
+  <div id="bat-test" class="tab-content active"></div>
+  <div id="bat-odi"  class="tab-content"></div>
+  <div id="bat-t20"  class="tab-content"></div>
+</section>
+
+<hr class="divider">
+
+<!-- ╔═══════════════════════════════════════╗ -->
+<!-- ║       BEST BOWLERS RANKINGS          ║ -->
+<!-- ╚═══════════════════════════════════════╝ -->
+<div class="rank-section" id="bowlers">
+  <div class="rank-inner">
+    <div class="sec-label">ICC Player Rankings · Bowling</div>
+    <h2 class="sec-title">Best <span>Bowlers</span></h2>
+    <div class="rank-tabs">
+      <button class="tab-btn active" onclick="switchTab('bowl-test','bowl')">TEST</button>
+      <button class="tab-btn" onclick="switchTab('bowl-odi','bowl')">ODI</button>
+      <button class="tab-btn" onclick="switchTab('bowl-t20','bowl')">T20I</button>
+    </div>
+    <div id="bowl-test" class="tab-content active"></div>
+    <div id="bowl-odi"  class="tab-content"></div>
+    <div id="bowl-t20"  class="tab-content"></div>
+  </div>
+</div>
+
+<!-- ╔═══════════════════════════════════════╗ -->
+<!-- ║       BEST ALL-ROUNDERS              ║ -->
+<!-- ╚═══════════════════════════════════════╝ -->
+<section id="allrounders">
+  <div class="sec-label">ICC Player Rankings · All-round</div>
+  <h2 class="sec-title">Best <span>All-rounders</span></h2>
+  <div class="rank-tabs">
+    <button class="tab-btn active" onclick="switchTab('all-test','all')">TEST</button>
+    <button class="tab-btn" onclick="switchTab('all-odi','all')">ODI</button>
+    <button class="tab-btn" onclick="switchTab('all-t20','all')">T20I</button>
+  </div>
+  <div id="all-test" class="tab-content active"></div>
+  <div id="all-odi"  class="tab-content"></div>
+  <div id="all-t20"  class="tab-content"></div>
+</section>
+
+<hr class="divider">
+
+<!-- ╔═══════════════════════════════════════╗ -->
+<!-- ║           CRICKET LEGENDS            ║ -->
+<!-- ╚═══════════════════════════════════════╝ -->
+<section>
+  <div class="sec-label">Hall of Fame</div>
+  <h2 class="sec-title">Cricket <span>Legends</span></h2>
+  <div class="stars-grid" id="legendsGrid"></div>
+</section>
+
+<footer>
+  <strong>CRICKET WORLD</strong> &nbsp;·&nbsp; All ICC Rankings &amp; Data · 2025 Season
+  <br><br>
+  Data represents approximate ICC rankings. For live rankings visit icc-cricket.com
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════ */
+const teams = [
+  { name: "India",       flag: "🇮🇳", testRank: 1,  odiRank: 1,  t20Rank: 1,  formats: ["test","odi","t20"] },
+  { name: "Australia",   flag: "🇦🇺", testRank: 2,  odiRank: 2,  t20Rank: 4,  formats: ["test","odi","t20"] },
+  { name: "England",     flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", testRank: 4,  odiRank: 3,  t20Rank: 3,  formats: ["test","odi","t20"] },
+  { name: "South Africa",flag: "🇿🇦", testRank: 3,  odiRank: 4,  t20Rank: 2,  formats: ["test","odi","t20"] },
+  { name: "New Zealand", flag: "🇳🇿", testRank: 5,  odiRank: 5,  t20Rank: 6,  formats: ["test","odi","t20"] },
+  { name: "Pakistan",    flag: "🇵🇰", testRank: 7,  odiRank: 7,  t20Rank: 5,  formats: ["test","odi","t20"] },
+  { name: "West Indies", flag: "🏏",  testRank: 8,  odiRank: 9,  t20Rank: 7,  formats: ["test","odi","t20"] },
+  { name: "Sri Lanka",   flag: "🇱🇰", testRank: 6,  odiRank: 6,  t20Rank: 8,  formats: ["test","odi","t20"] },
+  { name: "Bangladesh",  flag: "🇧🇩", testRank: 9,  odiRank: 8,  t20Rank: 10, formats: ["test","odi","t20"] },
+  { name: "Zimbabwe",    flag: "🇿🇼", testRank: 10, odiRank: 13, t20Rank: 13, formats: ["test","odi","t20"] },
+  { name: "Afghanistan", flag: "🇦🇫", testRank: 11, odiRank: 10, t20Rank: 9,  formats: ["test","odi","t20"] },
+  { name: "Ireland",     flag: "🇮🇪", testRank: 12, odiRank: 11, t20Rank: 11, formats: ["test","odi","t20"] },
+  { name: "Scotland",    flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", testRank: null,odiRank:14,  t20Rank: 12, formats: ["odi","t20"] },
+  { name: "Netherlands", flag: "🇳🇱", testRank: null,odiRank:12,  t20Rank: 14, formats: ["odi","t20"] },
+  { name: "UAE",         flag: "🇦🇪", testRank: null,odiRank:17,  t20Rank: 16, formats: ["odi","t20"] },
+  { name: "Nepal",       flag: "🇳🇵", testRank: null,odiRank:16,  t20Rank: 17, formats: ["odi","t20"] },
+  { name: "Papua New Guinea",flag:"🇵🇬",testRank:null,odiRank:18, t20Rank:19,  formats: ["odi","t20"] },
+  { name: "Oman",        flag: "🇴🇲", testRank: null,odiRank:19,  t20Rank: 18, formats: ["odi","t20"] },
+  { name: "USA",         flag: "🇺🇸", testRank: null,odiRank:20,  t20Rank: 15, formats: ["odi","t20"] },
+  { name: "Canada",      flag: "🇨🇦", testRank: null,odiRank:21,  t20Rank: 20, formats: ["odi","t20"] },
+];
+
+const teamRankData = {
+  test: [
+    { name:"India",       flag:"🇮🇳", pts:121 },
+    { name:"Australia",   flag:"🇦🇺", pts:116 },
+    { name:"South Africa",flag:"🇿🇦", pts:108 },
+    { name:"England",     flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", pts:106 },
+    { name:"New Zealand", flag:"🇳🇿", pts:98  },
+    { name:"Sri Lanka",   flag:"🇱🇰", pts:88  },
+    { name:"Pakistan",    flag:"🇵🇰", pts:84  },
+    { name:"West Indies", flag:"🏏",  pts:73  },
+    { name:"Bangladesh",  flag:"🇧🇩", pts:60  },
+    { name:"Zimbabwe",    flag:"🇿🇼", pts:42  },
+    { name:"Afghanistan", flag:"🇦🇫", pts:38  },
+    { name:"Ireland",     flag:"🇮🇪", pts:30  },
+  ],
+  odi: [
+    { name:"India",        flag:"🇮🇳", pts:119 },
+    { name:"Australia",    flag:"🇦🇺", pts:112 },
+    { name:"England",      flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", pts:108 },
+    { name:"South Africa", flag:"🇿🇦", pts:104 },
+    { name:"New Zealand",  flag:"🇳🇿", pts:97  },
+    { name:"Sri Lanka",    flag:"🇱🇰", pts:90  },
+    { name:"Pakistan",     flag:"🇵🇰", pts:85  },
+    { name:"Bangladesh",   flag:"🇧🇩", pts:76  },
+    { name:"West Indies",  flag:"🏏",  pts:70  },
+    { name:"Afghanistan",  flag:"🇦🇫", pts:64  },
+    { name:"Netherlands",  flag:"🇳🇱", pts:52  },
+    { name:"Zimbabwe",     flag:"🇿🇼", pts:48  },
+  ],
+  t20: [
+    { name:"India",        flag:"🇮🇳", pts:278 },
+    { name:"South Africa", flag:"🇿🇦", pts:265 },
+    { name:"England",      flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", pts:262 },
+    { name:"Australia",    flag:"🇦🇺", pts:258 },
+    { name:"Pakistan",     flag:"🇵🇰", pts:250 },
+    { name:"New Zealand",  flag:"🇳🇿", pts:245 },
+    { name:"West Indies",  flag:"🏏",  pts:230 },
+    { name:"Sri Lanka",    flag:"🇱🇰", pts:220 },
+    { name:"Afghanistan",  flag:"🇦🇫", pts:210 },
+    { name:"Bangladesh",   flag:"🇧🇩", pts:196 },
+    { name:"Ireland",      flag:"🇮🇪", pts:180 },
+    { name:"Scotland",     flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", pts:162 },
+  ],
+};
+
+const batters = {
+  test: [
+    { name:"Joe Root",        flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:895, avg:"52.3",  runs:"12946" },
+    { name:"Steve Smith",     flag:"🇦🇺", country:"Australia",     rating:880, avg:"56.1",  runs:"9572"  },
+    { name:"Marnus Labuschagne",flag:"🇦🇺",country:"Australia",    rating:872, avg:"51.4",  runs:"4600"  },
+    { name:"Kane Williamson", flag:"🇳🇿", country:"New Zealand",   rating:864, avg:"54.8",  runs:"8928"  },
+    { name:"Virat Kohli",     flag:"🇮🇳", country:"India",         rating:858, avg:"49.9",  runs:"9230"  },
+    { name:"Rohit Sharma",    flag:"🇮🇳", country:"India",         rating:840, avg:"40.3",  runs:"4301"  },
+    { name:"David Warner",    flag:"🇦🇺", country:"Australia",     rating:820, avg:"44.5",  runs:"8786"  },
+    { name:"Babar Azam",      flag:"🇵🇰", country:"Pakistan",      rating:810, avg:"45.5",  runs:"4169"  },
+    { name:"Usman Khawaja",   flag:"🇦🇺", country:"Australia",     rating:802, avg:"47.2",  runs:"4312"  },
+    { name:"Yashasvi Jaiswal",flag:"🇮🇳", country:"India",         rating:795, avg:"56.2",  runs:"1472"  },
+  ],
+  odi: [
+    { name:"Virat Kohli",     flag:"🇮🇳", country:"India",         rating:884, avg:"57.3",  runs:"13848" },
+    { name:"Babar Azam",      flag:"🇵🇰", country:"Pakistan",      rating:870, avg:"58.6",  runs:"5793"  },
+    { name:"Rohit Sharma",    flag:"🇮🇳", country:"India",         rating:854, avg:"48.7",  runs:"10709" },
+    { name:"Fakhar Zaman",    flag:"🇵🇰", country:"Pakistan",      rating:840, avg:"44.3",  runs:"3476"  },
+    { name:"Devon Conway",    flag:"🇳🇿", country:"New Zealand",   rating:828, avg:"52.1",  runs:"1862"  },
+    { name:"Quinton de Kock", flag:"🇿🇦", country:"South Africa",  rating:815, avg:"44.7",  runs:"5447"  },
+    { name:"David Warner",    flag:"🇦🇺", country:"Australia",     rating:808, avg:"45.3",  runs:"6932"  },
+    { name:"Tom Latham",      flag:"🇳🇿", country:"New Zealand",   rating:795, avg:"38.2",  runs:"3832"  },
+    { name:"Shubman Gill",    flag:"🇮🇳", country:"India",         rating:788, avg:"63.4",  runs:"2552"  },
+    { name:"Travis Head",     flag:"🇦🇺", country:"Australia",     rating:780, avg:"46.8",  runs:"1823"  },
+  ],
+  t20: [
+    { name:"Suryakumar Yadav",flag:"🇮🇳", country:"India",         rating:907, avg:"46.9",  runs:"4040"  },
+    { name:"Babar Azam",      flag:"🇵🇰", country:"Pakistan",      rating:885, avg:"44.9",  runs:"4223"  },
+    { name:"Mohammad Rizwan", flag:"🇵🇰", country:"Pakistan",      rating:860, avg:"48.4",  runs:"3780"  },
+    { name:"Dawid Malan",     flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:845, avg:"41.2",  runs:"2468"  },
+    { name:"Glenn Phillips",  flag:"🇳🇿", country:"New Zealand",   rating:832, avg:"36.4",  runs:"1840"  },
+    { name:"Virat Kohli",     flag:"🇮🇳", country:"India",         rating:820, avg:"52.7",  runs:"4188"  },
+    { name:"Jos Buttler",     flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:810, avg:"35.7",  runs:"3080"  },
+    { name:"Rohit Sharma",    flag:"🇮🇳", country:"India",         rating:800, avg:"32.7",  runs:"4131"  },
+    { name:"Travis Head",     flag:"🇦🇺", country:"Australia",     rating:792, avg:"41.5",  runs:"1452"  },
+    { name:"Philip Salt",     flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:780, avg:"38.1",  runs:"1422"  },
+  ],
+};
+
+const bowlers = {
+  test: [
+    { name:"Jasprit Bumrah",  flag:"🇮🇳", country:"India",         rating:897, avg:"19.6",  wkts:"195" },
+    { name:"Pat Cummins",     flag:"🇦🇺", country:"Australia",     rating:880, avg:"21.4",  wkts:"311" },
+    { name:"Kagiso Rabada",   flag:"🇿🇦", country:"South Africa",  rating:868, avg:"22.3",  wkts:"311" },
+    { name:"James Anderson",  flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:855, avg:"26.5",  wkts:"704" },
+    { name:"Ravichandran Ashwin",flag:"🇮🇳",country:"India",       rating:850, avg:"24.3",  wkts:"537" },
+    { name:"Nathan Lyon",     flag:"🇦🇺", country:"Australia",     rating:835, avg:"31.2",  wkts:"530" },
+    { name:"Stuart Broad",    flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:820, avg:"27.7",  wkts:"604" },
+    { name:"Josh Hazlewood",  flag:"🇦🇺", country:"Australia",     rating:815, avg:"25.1",  wkts:"230" },
+    { name:"Shaheen Afridi",  flag:"🇵🇰", country:"Pakistan",      rating:805, avg:"24.6",  wkts:"107" },
+    { name:"Tim Southee",     flag:"🇳🇿", country:"New Zealand",   rating:795, avg:"29.3",  wkts:"390" },
+  ],
+  odi: [
+    { name:"Jasprit Bumrah",  flag:"🇮🇳", country:"India",         rating:881, avg:"24.3",  wkts:"149" },
+    { name:"Trent Boult",     flag:"🇳🇿", country:"New Zealand",   rating:862, avg:"25.8",  wkts:"317" },
+    { name:"Kagiso Rabada",   flag:"🇿🇦", country:"South Africa",  rating:848, avg:"27.4",  wkts:"167" },
+    { name:"Mohammad Shami",  flag:"🇮🇳", country:"India",         rating:840, avg:"24.9",  wkts:"195" },
+    { name:"Shaheen Afridi",  flag:"🇵🇰", country:"Pakistan",      rating:828, avg:"27.8",  wkts:"115" },
+    { name:"Adam Zampa",      flag:"🇦🇺", country:"Australia",     rating:815, avg:"29.3",  wkts:"166" },
+    { name:"Josh Hazlewood",  flag:"🇦🇺", country:"Australia",     rating:808, avg:"26.1",  wkts:"82"  },
+    { name:"Lasith Malinga",  flag:"🇱🇰", country:"Sri Lanka",     rating:800, avg:"28.8",  wkts:"338" },
+    { name:"Mustafizur Rahman",flag:"🇧🇩",country:"Bangladesh",    rating:788, avg:"29.6",  wkts:"148" },
+    { name:"Wanindu Hasaranga",flag:"🇱🇰",country:"Sri Lanka",     rating:780, avg:"27.5",  wkts:"105" },
+  ],
+  t20: [
+    { name:"Rashid Khan",     flag:"🇦🇫", country:"Afghanistan",   rating:908, avg:"12.8",  wkts:"147" },
+    { name:"Jasprit Bumrah",  flag:"🇮🇳", country:"India",         rating:885, avg:"20.2",  wkts:"89"  },
+    { name:"Wanindu Hasaranga",flag:"🇱🇰",country:"Sri Lanka",     rating:870, avg:"14.6",  wkts:"110" },
+    { name:"Adam Zampa",      flag:"🇦🇺", country:"Australia",     rating:855, avg:"17.9",  wkts:"100" },
+    { name:"Shaheen Afridi",  flag:"🇵🇰", country:"Pakistan",      rating:840, avg:"19.5",  wkts:"79"  },
+    { name:"Sunil Narine",    flag:"🏏",  country:"West Indies",   rating:828, avg:"16.2",  wkts:"94"  },
+    { name:"Axar Patel",      flag:"🇮🇳", country:"India",         rating:815, avg:"22.4",  wkts:"79"  },
+    { name:"Adil Rashid",     flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:800, avg:"20.1",  wkts:"101" },
+    { name:"Kagiso Rabada",   flag:"🇿🇦", country:"South Africa",  rating:790, avg:"22.8",  wkts:"85"  },
+    { name:"Arshdeep Singh",  flag:"🇮🇳", country:"India",         rating:780, avg:"23.1",  wkts:"71"  },
+  ],
+};
+
+const allrounders = {
+  test: [
+    { name:"Ben Stokes",      flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:456, batAvg:"35.8", bowlAvg:"32.4" },
+    { name:"Ravindra Jadeja", flag:"🇮🇳", country:"India",         rating:430, batAvg:"38.7", bowlAvg:"24.6" },
+    { name:"Jason Holder",    flag:"🏏",  country:"West Indies",   rating:410, batAvg:"33.2", bowlAvg:"29.3" },
+    { name:"R Ashwin",        flag:"🇮🇳", country:"India",         rating:398, batAvg:"25.7", bowlAvg:"24.3" },
+    { name:"Mitchell Marsh",  flag:"🇦🇺", country:"Australia",     rating:385, batAvg:"34.1", bowlAvg:"36.2" },
+    { name:"Cameron Green",   flag:"🇦🇺", country:"Australia",     rating:372, batAvg:"32.4", bowlAvg:"30.8" },
+    { name:"Shakib Al Hasan", flag:"🇧🇩", country:"Bangladesh",    rating:360, batAvg:"32.5", bowlAvg:"31.2" },
+    { name:"Axar Patel",      flag:"🇮🇳", country:"India",         rating:348, batAvg:"26.3", bowlAvg:"28.4" },
+    { name:"Keshav Maharaj",  flag:"🇿🇦", country:"South Africa",  rating:335, batAvg:"21.6", bowlAvg:"27.8" },
+    { name:"Mehidy Hasan",    flag:"🇧🇩", country:"Bangladesh",    rating:320, batAvg:"26.1", bowlAvg:"29.4" },
+  ],
+  odi: [
+    { name:"Shakib Al Hasan", flag:"🇧🇩", country:"Bangladesh",    rating:395, batAvg:"37.8", bowlAvg:"29.6" },
+    { name:"Ben Stokes",      flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:380, batAvg:"40.1", bowlAvg:"32.2" },
+    { name:"Glenn Maxwell",   flag:"🇦🇺", country:"Australia",     rating:368, batAvg:"37.9", bowlAvg:"33.4" },
+    { name:"Hardik Pandya",   flag:"🇮🇳", country:"India",         rating:355, batAvg:"35.2", bowlAvg:"34.1" },
+    { name:"Ravindra Jadeja", flag:"🇮🇳", country:"India",         rating:342, batAvg:"32.9", bowlAvg:"36.7" },
+    { name:"Mitchell Marsh",  flag:"🇦🇺", country:"Australia",     rating:330, batAvg:"36.5", bowlAvg:"34.9" },
+    { name:"Jason Holder",    flag:"🏏",  country:"West Indies",   rating:318, batAvg:"29.3", bowlAvg:"30.4" },
+    { name:"Sikandar Raza",   flag:"🇿🇼", country:"Zimbabwe",      rating:306, batAvg:"34.6", bowlAvg:"32.1" },
+    { name:"Wanindu Hasaranga",flag:"🇱🇰",country:"Sri Lanka",     rating:294, batAvg:"28.1", bowlAvg:"28.4" },
+    { name:"Corey Anderson",  flag:"🇳🇿", country:"New Zealand",   rating:280, batAvg:"31.7", bowlAvg:"33.8" },
+  ],
+  t20: [
+    { name:"Hardik Pandya",   flag:"🇮🇳", country:"India",         rating:392, batAvg:"32.4", bowlAvg:"27.4" },
+    { name:"Shakib Al Hasan", flag:"🇧🇩", country:"Bangladesh",    rating:378, batAvg:"28.6", bowlAvg:"24.8" },
+    { name:"Glenn Maxwell",   flag:"🇦🇺", country:"Australia",     rating:364, batAvg:"34.1", bowlAvg:"29.6" },
+    { name:"Sunil Narine",    flag:"🏏",  country:"West Indies",   rating:352, batAvg:"26.3", bowlAvg:"16.9" },
+    { name:"Rashid Khan",     flag:"🇦🇫", country:"Afghanistan",   rating:340, batAvg:"22.6", bowlAvg:"13.6" },
+    { name:"Dasun Shanaka",   flag:"🇱🇰", country:"Sri Lanka",     rating:328, batAvg:"28.4", bowlAvg:"30.4" },
+    { name:"Sikandar Raza",   flag:"🇿🇼", country:"Zimbabwe",      rating:316, batAvg:"30.2", bowlAvg:"28.6" },
+    { name:"Marco Jansen",    flag:"🇿🇦", country:"South Africa",  rating:304, batAvg:"26.7", bowlAvg:"29.2" },
+    { name:"Axar Patel",      flag:"🇮🇳", country:"India",         rating:292, batAvg:"24.8", bowlAvg:"22.8" },
+    { name:"Sam Curran",      flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", country:"England",      rating:280, batAvg:"28.3", bowlAvg:"26.4" },
+  ],
+};
+
+const legends = [
+  { name:"Sachin Tendulkar", country:"India 🇮🇳",      type:"bat",  badge:"badge-bat", top:"",         emoji:"🏏", s1:"34357",  l1:"Int'l Runs",  s2:"100",  l2:"Centuries" },
+  { name:"Virat Kohli",      country:"India 🇮🇳",      type:"bat",  badge:"badge-bat", top:"",         emoji:"👑", s1:"27286",  l1:"Int'l Runs",  s2:"80",   l2:"Centuries" },
+  { name:"Jasprit Bumrah",   country:"India 🇮🇳",      type:"bowl", badge:"badge-bowl",top:"bowler",   emoji:"🎯", s1:"433",    l1:"Int'l Wkts",  s2:"19.6", l2:"Test Avg"  },
+  { name:"Rashid Khan",      country:"Afghanistan 🇦🇫",type:"bowl", badge:"badge-bowl",top:"bowler",   emoji:"🌀", s1:"527",    l1:"Int'l Wkts",  s2:"12.8", l2:"T20 Avg"   },
+  { name:"Ben Stokes",       country:"England 🏴󠁧󠁢󠁥󠁮󠁧󠁿",   type:"all",  badge:"badge-all", top:"allrounder",emoji:"⚡",s1:"7044",   l1:"Test Runs",   s2:"196",  l2:"Test Wkts" },
+  { name:"Shakib Al Hasan",  country:"Bangladesh 🇧🇩",  type:"all",  badge:"badge-all", top:"allrounder",emoji:"💫",s1:"14785",  l1:"Int'l Runs",  s2:"700",  l2:"Int'l Wkts"},
+  { name:"Pat Cummins",      country:"Australia 🇦🇺",  type:"bowl", badge:"badge-bowl",top:"bowler",   emoji:"🔥", s1:"311",    l1:"Test Wkts",   s2:"21.4", l2:"Test Avg"  },
+  { name:"Joe Root",         country:"England 🏴󠁧󠁢󠁥󠁮󠁧󠁿",   type:"bat",  badge:"badge-bat", top:"",         emoji:"🎩", s1:"12946",  l1:"Test Runs",   s2:"34",   l2:"Centuries" },
+  { name:"Suryakumar Yadav", country:"India 🇮🇳",      type:"bat",  badge:"badge-bat", top:"",         emoji:"🚀", s1:"4040",   l1:"T20 Runs",    s2:"907",  l2:"ICC Rating" },
+  { name:"Kagiso Rabada",    country:"South Africa 🇿🇦",type:"bowl",badge:"badge-bowl",top:"bowler",   emoji:"💥", s1:"644",    l1:"Int'l Wkts",  s2:"22.3", l2:"Test Avg"  },
+  { name:"Steve Smith",      country:"Australia 🇦🇺",  type:"bat",  badge:"badge-bat", top:"",         emoji:"🦅", s1:"9572",   l1:"Test Runs",   s2:"32",   l2:"Centuries" },
+  { name:"Hardik Pandya",    country:"India 🇮🇳",      type:"all",  badge:"badge-all", top:"allrounder",emoji:"⚔️",s1:"2990",   l1:"T20 Runs",    s2:"180",  l2:"T20 Wkts"  },
+];
+
+/* ═══════════════════════════════════════════════
+   RENDER TEAMS
+═══════════════════════════════════════════════ */
+function renderTeams() {
+  const grid = document.getElementById('teamGrid');
+  teams.forEach(t => {
+    const bestRank = Math.min(
+      ...[t.testRank, t.odiRank, t.t20Rank].filter(r => r !== null)
+    );
+    const formats = t.formats.map(f => `<span class="team-status status-${f}">${f.toUpperCase()}</span>`).join(' ');
+    grid.innerHTML += `
+      <div class="team-card">
+        <span class="team-flag">${t.flag}</span>
+        <div class="team-name">${t.name}</div>
+        <div class="team-rank">Best Rank <strong>#${bestRank}</strong></div>
+        <div style="margin-top:8px">${formats}</div>
+      </div>`;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER TEAM RANKING TABLE
+═══════════════════════════════════════════════ */
+function makeTeamTable(data, maxRating) {
+  let html = `<table class="rank-table">
+    <thead><tr>
+      <th>#</th><th>Team</th><th>Rating Points</th>
+    </tr></thead><tbody>`;
+  data.forEach((row, i) => {
+    const cls = i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const pct = (row.pts / maxRating * 100).toFixed(1);
+    html += `<tr>
+      <td class="rank-no ${cls}">${i+1}</td>
+      <td>
+        <div class="player-info">
+          <div class="player-avatar">${row.flag}</div>
+          <div>
+            <div class="player-name-cell">${row.name}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="rating-num">${row.pts}</div>
+        <div class="rating-bar-wrap">
+          <div class="rating-bar"><div class="rating-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER PLAYER RANKING TABLE
+═══════════════════════════════════════════════ */
+function makePlayerTable(data, statLabel1, statLabel2, maxRating=910) {
+  let html = `<table class="rank-table">
+    <thead><tr>
+      <th>#</th><th>Player</th><th>Country</th><th>ICC Rating</th><th>${statLabel1}</th><th>${statLabel2}</th>
+    </tr></thead><tbody>`;
+  data.forEach((row, i) => {
+    const cls = i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const pct = (row.rating / maxRating * 100).toFixed(1);
+    html += `<tr>
+      <td class="rank-no ${cls}">${i+1}</td>
+      <td>
+        <div class="player-info">
+          <div class="player-avatar">${row.flag}</div>
+          <div><div class="player-name-cell">${row.name}</div></div>
+        </div>
+      </td>
+      <td><span style="color:var(--muted);font-size:.82rem">${row.country}</span></td>
+      <td>
+        <div class="rating-num">${row.rating}</div>
+        <div class="rating-bar-wrap">
+          <div class="rating-bar"><div class="rating-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+      </td>
+      <td style="color:var(--text);font-size:.9rem">${row.avg}</td>
+      <td style="color:var(--gold);font-weight:600">${row.runs !== undefined ? row.runs : row.wkts}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+function makeAllRounderTable(data) {
+  let html = `<table class="rank-table">
+    <thead><tr>
+      <th>#</th><th>Player</th><th>Country</th><th>ICC Rating</th><th>Bat Avg</th><th>Bowl Avg</th>
+    </tr></thead><tbody>`;
+  data.forEach((row, i) => {
+    const cls = i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const pct = (row.rating / 460 * 100).toFixed(1);
+    html += `<tr>
+      <td class="rank-no ${cls}">${i+1}</td>
+      <td>
+        <div class="player-info">
+          <div class="player-avatar">${row.flag}</div>
+          <div><div class="player-name-cell">${row.name}</div></div>
+        </div>
+      </td>
+      <td><span style="color:var(--muted);font-size:.82rem">${row.country}</span></td>
+      <td>
+        <div class="rating-num">${row.rating}</div>
+        <div class="rating-bar-wrap">
+          <div class="rating-bar"><div class="rating-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#00C853,#69F0AE)"></div></div>
+        </div>
+      </td>
+      <td style="color:var(--gold)">${row.batAvg}</td>
+      <td style="color:var(--blue)">${row.bowlAvg}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER LEGENDS
+═══════════════════════════════════════════════ */
+function renderLegends() {
+  const grid = document.getElementById('legendsGrid');
+  const typeLabel = { bat:'Batting Legend', bowl:'Bowling Legend', all:'All-round Legend' };
+  legends.forEach(p => {
+    const topClass = p.top === 'bowler' ? 'bowler' : p.top === 'allrounder' ? 'allrounder' : '';
+    grid.innerHTML += `
+      <div class="star-card">
+        <div class="star-card-top ${topClass}"></div>
+        <div class="star-card-body">
+          <div class="star-emoji">${p.emoji}</div>
+          <div class="star-badge ${p.badge}">${typeLabel[p.type]}</div>
+          <div class="star-name">${p.name}</div>
+          <div class="star-country">${p.country}</div>
+          <div class="star-stats">
+            <div class="stat-item">
+              <div class="stat-num">${p.s1}</div>
+              <div class="stat-label">${p.l1}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-num">${p.s2}</div>
+              <div class="stat-label">${p.l2}</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   TAB SWITCHER
+═══════════════════════════════════════════════ */
+function switchTab(id, group) {
+  document.querySelectorAll(`[id^="${group === 'team' ? 'test-rank' : group === 'player' ? 'bat-' : group === 'bowl' ? 'bowl-' : 'all-'}"], [id^="${id.split('-')[0]}-"]`).forEach(el => {
+    el.classList.remove('active');
+  });
+  // simpler: just toggle siblings
+  const el = document.getElementById(id);
+  el.parentElement.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  el.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  event.target.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+renderTeams();
+
+// Team rankings
+document.getElementById('test-rank').innerHTML = makeTeamTable(teamRankData.test, 121);
+document.getElementById('odi-rank').innerHTML  = makeTeamTable(teamRankData.odi,  119);
+document.getElementById('t20-rank').innerHTML  = makeTeamTable(teamRankData.t20,  278);
+
+// Batters
+document.getElementById('bat-test').innerHTML = makePlayerTable(batters.test,'Average','Runs');
+document.getElementById('bat-odi').innerHTML  = makePlayerTable(batters.odi, 'Average','Runs');
+document.getElementById('bat-t20').innerHTML  = makePlayerTable(batters.t20, 'Average','Runs');
+
+// Bowlers
+document.getElementById('bowl-test').innerHTML = makePlayerTable(bowlers.test,'Average','Wickets');
+document.getElementById('bowl-odi').innerHTML  = makePlayerTable(bowlers.odi, 'Average','Wickets');
+document.getElementById('bowl-t20').innerHTML  = makePlayerTable(bowlers.t20, 'Average','Wickets');
+
+// All-rounders
+document.getElementById('all-test').innerHTML = makeAllRounderTable(allrounders.test);
+document.getElementById('all-odi').innerHTML  = makeAllRounderTable(allrounders.odi);
+document.getElementById('all-t20').innerHTML  = makeAllRounderTable(allrounders.t20);
+
+renderLegends();
+</script>
+</body>
+</html>
